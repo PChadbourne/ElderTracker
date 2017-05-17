@@ -20,7 +20,7 @@ int main(){
 		//While there are more processes:
 		while (Process32Next(snapshot, &entry) == TRUE){
 			//If the exeFile name is equal to the correct file name:
-			if (stricmp((char *)entry.szExeFile, "The Elder Scrolls Legends.exe") == 0){
+			if (_stricmp((char *)entry.szExeFile, "The Elder Scrolls Legends.exe") == 0){
 
 				HANDLE hProcess = OpenProcess(PROCESS_VM_READ, FALSE, entry.th32ProcessID);
 				if (hProcess == INVALID_HANDLE_VALUE) {
@@ -47,7 +47,7 @@ void scanProcessModules(DWORD dwPID) {
 	if (hModuleSnap == INVALID_HANDLE_VALUE)
 	{
 		printError(TEXT("CreateToolhelp32Snapshot (of modules)"));
-		return(FALSE);
+		return;
 	}
 
 	// Set the size of the structure before using it.
