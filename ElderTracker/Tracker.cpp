@@ -8,10 +8,10 @@
 void scanProcessModules(DWORD dwPID);
 void printError(TCHAR* msg);
 
-int main(){
+int main( void ){
 	PROCESSENTRY32 entry;
 	entry.dwSize = sizeof(PROCESSENTRY32);
-
+	TCHAR toFind[] = _T("The Elder Scrolls Legends.exe");
 	//Get a snapshot of all currently running processes
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
 
@@ -20,8 +20,8 @@ int main(){
 		//While there are more processes:
 		while (Process32Next(snapshot, &entry) == TRUE){
 			//If the exeFile name is equal to the correct file name:
-			if (_stricmp((char *)entry.szExeFile, "The Elder Scrolls Legends.exe") == 0){
-
+			if (_tcscmp(entry.szExeFile, toFind) == 0){
+				std::cout << "Found TES" << std::endl;
 				HANDLE hProcess = OpenProcess(PROCESS_VM_READ, FALSE, entry.th32ProcessID);
 				if (hProcess == INVALID_HANDLE_VALUE) {
 					std::cout << "Couldn't Open Process" << std::endl;
@@ -30,6 +30,7 @@ int main(){
 				std::thread scan(scanProcessModules, entry.th32ProcessID);
 				scan.join();
 				CloseHandle(hProcess);
+				break;
 			}
 		}
 	}
@@ -62,17 +63,16 @@ void scanProcessModules(DWORD dwPID) {
 		return;
 	}
 
+
+	TCHAR toFind[] = _T("The Elder Scrolls Legends.exe");
 	// Now walk the module list of the process,
 	// and display information about each module
 	do
 	{
-		_tprintf(TEXT("\n\n     MODULE NAME:     %s"), me32.szModule);
-		_tprintf(TEXT("\n     Executable     = %s"), me32.szExePath);
-		_tprintf(TEXT("\n     Process ID     = 0x%08X"), me32.th32ProcessID);
-		_tprintf(TEXT("\n     Ref count (g)  = 0x%04X"), me32.GlblcntUsage);
-		_tprintf(TEXT("\n     Ref count (p)  = 0x%04X"), me32.ProccntUsage);
-		_tprintf(TEXT("\n     Base address   = 0x%08X"), (DWORD)me32.modBaseAddr);
-		_tprintf(TEXT("\n     Base size      = %d"), me32.modBaseSize);
+		if (_tcscmp(me32.szModule, toFind) == 0) {
+			_tprintf(TEXT("\nBase address = 0x%08X\n"), (DWORD)me32.modBaseAddr);
+			break;
+		}
 
 	} while (Module32Next(hModuleSnap, &me32));
 
